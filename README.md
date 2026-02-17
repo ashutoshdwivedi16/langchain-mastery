@@ -1,206 +1,189 @@
-# 🦜🔗 langchain-mastery
+# langchain-mastery
 
-> **A complete, hands-on LangChain learning journey** — from zero to building real AI applications.
-> 100% free local setup available (no API keys needed!).
+Production-ready LangChain patterns and implementations — covering the full stack from LLM abstraction to RAG pipelines, agents, and structured output. Supports both OpenAI-compatible APIs and fully local inference via Ollama.
 
-![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=flat-square&logo=python)
-![LangChain](https://img.shields.io/badge/LangChain-0.1.0-green?style=flat-square)
-![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-orange?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
-![Learning](https://img.shields.io/badge/Learning-In%20Public-purple?style=flat-square)
-![Day](https://img.shields.io/badge/90--Day_Challenge-Day%201-red?style=flat-square)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![LangChain](https://img.shields.io/badge/LangChain-0.1.0-1C3C3C?style=flat-square)](https://python.langchain.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](./LICENSE)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/psf/black)
 
 ---
 
-## 🗺️ Quick Navigation
+## Overview
 
-| 📂 Section | 📄 What's Inside | 🔗 Link |
-|-----------|-----------------|---------|
-| **💻 Code** | All runnable examples & projects | [`code/`](./code/) |
-| **📚 Docs** | Learning journal, concepts, guides | [`docs/`](./docs/) |
-| **📖 Resources** | Books, courses, papers, references | [`resources/`](./resources/) |
-| **📝 Journal** | Daily learning log (Week by week) | [`docs/journal/`](./docs/journal/) |
-| **🧠 Concepts** | Deep-dive explanations | [`docs/concepts/`](./docs/concepts/) |
-| **🚀 Quick Start** | Get running in 5 minutes | [QUICKSTART.md](./QUICKSTART.md) |
+This repository provides a structured reference implementation of core LangChain components. Each module is self-contained, runnable, and annotated to demonstrate both the mechanics and the reasoning behind each pattern.
 
----
+**Supports two inference backends:**
 
-## 🌐 Learning Ecosystem
+| Backend | Setup | Cost | Privacy |
+|--------|-------|------|---------|
+| **Ollama** (local) | `ollama pull llama2` | Free | 100% local |
+| **OpenAI API** | Set `OPENAI_API_KEY` | Pay-per-token | Cloud |
 
-This is **Repository 1 of 5** in my 90-day public learning challenge:
-
-| # | Repository | Focus | Status |
-|---|-----------|-------|--------|
-| 1 | 🦜 **langchain-mastery** ← *You are here* | LangChain, LLMs, RAG, Agents | 🟢 Active (Day 1/21) |
-| 2 | 🐍 python-mastery | Python advanced patterns | 🔜 Day 22 |
-| 3 | 🔥 pytorch-mastery | Deep learning & neural nets | 🔜 Day 50 |
-| 4 | ☕ java-mastery | Java & Spring Boot | 🔜 Day 78 |
-| 5 | 🏠 portfolio-showcase | Meta portfolio hub | 🔜 Ongoing |
+The local path uses `sentence-transformers` for embeddings and `FAISS` for vector storage — no external dependencies beyond the initial model download.
 
 ---
 
-## 🎯 What You'll Learn
+## Repository Structure
 
 ```
-Week 1 — Foundations
-  ✅ LLM basics (local + API)
-  ✅ Prompt templates & LCEL chains
-  ✅ Output parsing (Pydantic, JSON)
-
-Week 2 — Intermediate
-  ✅ Memory types (buffer, window, summary)
-  ✅ RAG with vector stores (FAISS, Chroma)
-  ✅ Document loading & text splitting
-
-Week 3 — Advanced + Projects
-  ✅ Agents with custom tools
-  ✅ Project: Personal Knowledge Base
-  ✅ Project: Document Chatbot
-  ✅ Project: Code Assistant
+langchain-mastery/
+├── code/
+│   ├── basics/                  # Core pattern implementations
+│   │   ├── 01_basic_llm.py                  # LLM abstraction layer
+│   │   ├── 01_basic_llm_local.py            # Ollama backend
+│   │   ├── 02_prompts_and_chains.py         # LCEL chain composition
+│   │   ├── 03_memory_and_conversation.py    # Stateful conversation patterns
+│   │   ├── 04_rag_vector_stores.py          # RAG pipeline (OpenAI + Chroma/FAISS)
+│   │   ├── 04_rag_vector_stores_local.py    # RAG pipeline (local, zero-cost)
+│   │   ├── 05_agents_and_tools.py           # ReAct agent + tool definitions
+│   │   └── 06_output_parsers.py             # Pydantic, structured, JSON output
+│   ├── intermediate/            # Advanced chain patterns
+│   ├── advanced/                # Production patterns, async, streaming
+│   ├── projects/                # End-to-end application implementations
+│   ├── scripts/                 # CLI runners and setup utilities
+│   ├── requirements.txt         # OpenAI backend dependencies
+│   └── requirements-local.txt  # Local/Ollama backend dependencies
+├── docs/
+│   ├── journal/                 # Implementation notes and decisions
+│   ├── concepts/                # Architecture deep-dives
+│   ├── guides/                  # Deployment and integration guides
+│   └── comparisons/             # Backend and model comparisons
+└── resources/
+    ├── books/
+    ├── papers/
+    └── reference/
 ```
 
 ---
 
-## 🚀 Quick Start (Choose Your Path)
+## Installation
 
-### 🆓 Path A: Free Local Setup (No API Key!)
+### Local Backend (Ollama)
+
 ```bash
-# 1. Install Ollama  →  https://ollama.ai
-ollama pull llama2
+# Install Ollama — https://ollama.ai
+ollama pull llama2        # or: mistral, phi, codellama
 
-# 2. Install dependencies
+git clone https://github.com/ashutoshdwivedi16/langchain-mastery.git
+cd langchain-mastery
 pip install -r code/requirements-local.txt
-
-# 3. Run first example
-python code/basics/01_basic_llm_local.py
 ```
 
-### 💳 Path B: OpenAI API
-```bash
-# 1. Get API key  →  https://platform.openai.com
-cp .env.example .env
-# Add: OPENAI_API_KEY=sk-...
+### OpenAI Backend
 
-# 2. Install dependencies
+```bash
+git clone https://github.com/ashutoshdwivedi16/langchain-mastery.git
+cd langchain-mastery
 pip install -r code/requirements.txt
-
-# 3. Run first example
-python code/basics/01_basic_llm.py
+cp .env.example .env
+# Set OPENAI_API_KEY in .env
 ```
 
-### 🎮 Interactive Mode
+---
+
+## Usage
+
+Run any module directly:
+
 ```bash
-# Menu-driven exploration of all examples
+python code/basics/01_basic_llm_local.py
+python code/basics/04_rag_vector_stores_local.py
+python code/basics/05_agents_and_tools.py
+```
+
+Or use the interactive CLI:
+
+```bash
 python code/scripts/run_all_local.py
 ```
 
 ---
 
-## 📁 Repository Structure
+## Modules
 
-```
-langchain-mastery/
-│
-├── 📋 README.md              ← You are here
-├── 📋 QUICKSTART.md          ← 5-min onboarding
-├── 📋 CONTRIBUTING.md        ← How to contribute
-├── 📋 CHANGELOG.md           ← What changed when
-├── 📋 LICENSE                ← MIT
-│
-├── 💻 code/                  ← ALL EXECUTABLE CODE
-│   ├── requirements.txt      ← API version deps
-│   ├── requirements-local.txt ← Free/local deps
-│   ├── basics/               ← Week 1 examples (01–06)
-│   ├── intermediate/         ← Week 2 examples (coming)
-│   ├── advanced/             ← Week 3 examples (coming)
-│   ├── projects/             ← Real applications (coming)
-│   ├── templates/            ← Starter templates (coming)
-│   └── scripts/              ← Setup & runners
-│
-├── 📚 docs/                  ← ALL DOCUMENTATION
-│   ├── journal/              ← Daily learning log
-│   │   ├── week-01/          ← This week's entries
-│   │   └── ...
-│   ├── concepts/             ← Deep-dive guides (coming)
-│   ├── guides/               ← How-to tutorials (coming)
-│   ├── comparisons/          ← Technology comparisons (coming)
-│   └── diagrams/             ← Visual aids (coming)
-│
-└── 📖 resources/             ← REFERENCE MATERIALS
-    ├── books/                ← Book notes (coming)
-    ├── courses/              ← Course materials (coming)
-    └── reference/            ← Cheat sheets (coming)
+### `01` — LLM Abstraction
+
+Demonstrates the unified LangChain LLM interface across backends. Covers synchronous invocation, batch processing, and streaming callbacks.
+
+```python
+from langchain_community.llms import Ollama
+llm = Ollama(model="llama2", temperature=0.7)
+response = llm.invoke("Explain vector embeddings in two sentences.")
 ```
 
----
+### `02` — Prompt Templates & LCEL Chains
 
-## 💻 Code Examples
+LCEL pipe syntax for composing prompt → model → parser pipelines. Covers `PromptTemplate`, `ChatPromptTemplate`, and sequential chain patterns.
 
-### Basics (`code/basics/`)
+```python
+chain = prompt | llm | StrOutputParser()
+result = chain.invoke({"topic": "retrieval-augmented generation"})
+```
 
-| File | Topic | API | Local (Free) |
-|------|-------|-----|-------------|
-| `01_basic_llm.py` | Simple LLM calls | ✅ | — |
-| `01_basic_llm_local.py` | LLM with Ollama | — | ✅ |
-| `02_prompts_and_chains.py` | Templates & LCEL | ✅ | — |
-| `03_memory_and_conversation.py` | Memory types | ✅ | — |
-| `04_rag_vector_stores.py` | RAG + FAISS/Chroma | ✅ | — |
-| `04_rag_vector_stores_local.py` | RAG + HuggingFace | — | ✅ |
-| `05_agents_and_tools.py` | Agents & tools | ✅ | — |
-| `06_output_parsers.py` | Pydantic, JSON | ✅ | — |
+### `03` — Memory & Conversation State
 
----
+Three memory strategies with different token-efficiency tradeoffs:
+- `ConversationBufferMemory` — full history retention
+- `ConversationBufferWindowMemory` — sliding window (last *k* turns)
+- `ConversationSummaryMemory` — LLM-compressed history
 
-## 📊 Progress Tracker
+### `04` — RAG Pipeline
 
-### Week 1: LangChain Foundations
-| Day | Topic | Status | Journal |
-|-----|-------|--------|---------|
-| 1 | Setup & Structure | ✅ Done | [Day 1](./docs/journal/week-01/day-01-setup.md) |
-| 2 | Basic LLM | 🔜 Tomorrow | — |
-| 3 | Prompts & Chains | ⏳ Pending | — |
-| 4 | Output Parsers | ⏳ Pending | — |
-| 5 | Memory | ⏳ Pending | — |
-| 6 | RAG | ⏳ Pending | — |
-| 7 | Reflection | ⏳ Pending | — |
+Full retrieval-augmented generation implementation:
 
----
+```
+Documents → TextSplitter → Embeddings → VectorStore → Retriever → LLM
+```
 
-## 🆚 Free vs API Comparison
+Local variant uses `sentence-transformers/all-MiniLM-L6-v2` (384-dim) with FAISS for ANN search. Supports similarity search with relevance scores.
 
-| Feature | 🆓 Local (Ollama) | 💳 API (OpenAI) |
-|---------|------------------|-----------------|
-| Cost | **$0 forever** | ~$0.002 / 1K tokens |
-| Privacy | **100% local** | Sent to OpenAI |
-| Setup | 5 minutes | Need credit card |
-| Quality | Good (llama2/mistral) | Excellent (GPT-4) |
-| Speed | Depends on hardware | Very fast |
-| Internet | Not needed* | Required |
+### `05` — Agents & Tools
 
-*After initial model download*
+ReAct agent with custom tool definitions using the `@tool` decorator. Demonstrates multi-step reasoning, tool chaining, and agent memory integration.
+
+```python
+@tool
+def calculate(expression: str) -> str:
+    """Evaluates a mathematical expression."""
+    return str(eval(expression, {"__builtins__": {}}))
+```
+
+### `06` — Output Parsers
+
+Structured extraction from LLM output:
+- `CommaSeparatedListOutputParser`
+- `StructuredOutputParser` with `ResponseSchema`
+- `PydanticOutputParser` with validation and nested models
 
 ---
 
-## 🤝 Contributing
+## Architecture Notes
 
-Found a bug? Have an improvement? See [CONTRIBUTING.md](./CONTRIBUTING.md).
+**LCEL vs Legacy Chains**
 
-All skill levels welcome — this is a learning repo! 🎓
+All implementations use the LangChain Expression Language (LCEL) rather than legacy `LLMChain` / `SequentialChain`. LCEL provides native streaming, async support, and better composability.
+
+**Embedding Model Selection**
+
+For local deployments, `all-MiniLM-L6-v2` balances accuracy and speed (384 dimensions, ~80MB). For higher accuracy at larger scale, swap to `all-mpnet-base-v2` (768 dimensions) or a domain-specific model.
+
+**Vector Store Tradeoffs**
+
+| Store | Best For | Persistence |
+|-------|----------|-------------|
+| FAISS | In-process, high throughput | Manual (`save_local`) |
+| Chroma | Persistent dev/test | Automatic |
+| Pinecone | Production scale | Managed |
 
 ---
 
-## 📜 License
+## Contributing
 
-MIT — free to use, share, and build upon. See [LICENSE](./LICENSE).
+See [CONTRIBUTING.md](./CONTRIBUTING.md). Bug reports, improvements, and additional pattern implementations are welcome.
 
 ---
 
-<div align="center">
+## License
 
-**Built in public, one commit at a time 🚀**
-
-*Part of a 90-day learning challenge*
-
-⭐ Star this repo if it helped you learn!
-
-</div>
+MIT. See [LICENSE](./LICENSE).
