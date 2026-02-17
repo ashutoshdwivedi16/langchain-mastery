@@ -1,0 +1,26 @@
+# LangChain Hello World - Local/Free Version (No API Required)
+
+# Core LangChain
+langchain==0.1.0
+langchain-community==0.0.13
+
+# For Ollama (Free local LLMs)
+# Install Ollama from: https://ollama.ai
+# No additional Python package needed - uses REST API
+
+# For HuggingFace Models (Free)
+huggingface-hub==0.20.2
+sentence-transformers==2.3.1
+transformers==4.36.2
+torch==2.1.2
+
+# Vector Stores
+chromadb==0.4.22
+faiss-cpu==1.7.4
+
+# Utilities
+python-dotenv==1.0.0
+tiktoken==0.5.2
+
+# Optional: For better performance
+accelerate==0.25.0
