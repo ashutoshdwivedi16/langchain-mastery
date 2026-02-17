@@ -3,12 +3,14 @@ Feature 4: RAG (Retrieval-Augmented Generation) - LOCAL VERSION
 Uses HuggingFace embeddings (free) and local LLM
 """
 
-from langchain_community.llms import Ollama
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_ollama import OllamaLLM
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma, FAISS
-from langchain.chains import RetrievalQA
-from langchain.docstore.document import Document
+from langchain_core.documents import Document
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
 
 def check_ollama():
     """Check if Ollama is accessible"""
@@ -119,65 +121,66 @@ def faiss_vector_store_example():
     return vectorstore
 
 def rag_with_local_llm():
-    """Complete RAG with local LLM and free embeddings"""
+    """Complete RAG with local LLM — modern LCEL pipeline."""
     print("\n" + "="*60)
     print("FEATURE 4C: RAG with Local LLM (100% Free!)")
     print("="*60)
 
     if not check_ollama():
-        print("\n❌ Ollama is not running!")
-        print("Please start Ollama to run this example.")
+        print("\nOllama is not running. Start with: ollama serve")
         return
 
-    print("\n🔧 Setting up RAG system...")
+    print("\nSetting up RAG pipeline...")
 
-    # Setup local LLM
-    llm = Ollama(model="llama2", temperature=0)
+    llm = OllamaLLM(model="llama2", temperature=0)
 
-    # Setup free embeddings
-    print("📥 Loading embeddings model...")
+    print("Loading embeddings model...")
     embeddings = HuggingFaceEmbeddings(
         model_name="sentence-transformers/all-MiniLM-L6-v2",
-        model_kwargs={'device': 'cpu'}
+        model_kwargs={"device": "cpu"},
     )
 
-    # Create documents
-    docs = create_sample_documents()
+    vectorstore = FAISS.from_documents(create_sample_documents(), embeddings)
+    retriever = vectorstore.as_retriever(search_kwargs={"k": 2})
 
-    # Create vector store
-    print("📊 Creating vector store...")
-    vectorstore = FAISS.from_documents(docs, embeddings)
+    # Modern LCEL RAG chain
+    rag_prompt = ChatPromptTemplate.from_messages([
+        ("system",
+         "Answer the question using only the context below.\n\n"
+         "Context:\n{context}"),
+        ("human", "{question}"),
+    ])
 
-    # Create RAG chain
-    print("⛓️  Creating RAG chain...")
-    qa_chain = RetrievalQA.from_chain_type(
-        llm=llm,
-        chain_type="stuff",
-        retriever=vectorstore.as_retriever(search_kwargs={"k": 2}),
-        return_source_documents=True
+    def format_docs(docs):
+        return "\n\n".join(d.page_content for d in docs)
+
+    rag_chain = (
+        {"context": retriever | format_docs, "question": RunnablePassthrough()}
+        | rag_prompt
+        | llm
+        | StrOutputParser()
     )
 
-    print("✅ RAG system ready!\n")
+    print("RAG pipeline ready.\n")
 
-    # Ask questions
     questions = [
         "What is LangChain?",
         "How does RAG work?",
-        "What is Ollama and why would I use it?"
+        "What is Ollama and why would I use it?",
     ]
 
     for question in questions:
         print(f"\n{'='*60}")
-        print(f"❓ Question: {question}")
+        print(f"Question: {question}")
         print('='*60)
+        answer = rag_chain.invoke(question)
+        print(f"Answer:\n{answer}")
 
-        result = qa_chain.invoke({"query": question})
-
-        print(f"\n💬 Answer:\n{result['result']}")
-
-        print(f"\n📚 Sources:")
-        for i, doc in enumerate(result['source_documents'], 1):
-            print(f"  {i}. {doc.metadata['source']} - {doc.metadata['topic']}")
+        # Show which docs were retrieved
+        retrieved = retriever.invoke(question)
+        print(f"\nSources:")
+        for i, doc in enumerate(retrieved, 1):
+            print(f"  {i}. {doc.metadata['source']} ({doc.metadata['topic']})")
 
 def text_splitting_example():
     """Demonstrates text splitting"""

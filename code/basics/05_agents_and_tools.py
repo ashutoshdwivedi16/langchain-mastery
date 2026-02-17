@@ -1,22 +1,26 @@
 """
 Feature 5: Agents and Tools
-Demonstrates how agents can use tools to solve complex problems
+Demonstrates how agents can use tools to solve complex problems.
+Uses LangGraph's create_react_agent (LangChain 1.x / LangGraph 1.x).
 """
 
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
-from langchain.agents import Tool, AgentExecutor, create_react_agent
-from langchain.tools import tool
-from langchain import hub
+from langchain_core.tools import tool, Tool
+from langchain_core.messages import HumanMessage
+from langgraph.prebuilt import create_react_agent
 import datetime
 
 load_dotenv()
 
-# Define custom tools using the @tool decorator
+
+# ── Custom tools ─────────────────────────────────────────────────────────────
+
 @tool
 def get_current_time(format: str = "%Y-%m-%d %H:%M:%S") -> str:
     """Returns the current date and time. Use this when you need to know what time it is."""
     return datetime.datetime.now().strftime(format)
+
 
 @tool
 def calculate(expression: str) -> str:
@@ -27,16 +31,33 @@ def calculate(expression: str) -> str:
     except Exception as e:
         return f"Error calculating: {str(e)}"
 
+
 @tool
 def word_counter(text: str) -> str:
     """Counts the number of words in the provided text."""
     word_count = len(text.split())
     return f"The text contains {word_count} words."
 
+
 @tool
 def text_reverser(text: str) -> str:
     """Reverses the given text."""
     return text[::-1]
+
+
+# ── Helper ─────────────────────────────────────────────────────────────────
+
+def _run_agent(graph, question: str, verbose: bool = True) -> str:
+    """Run a LangGraph ReAct agent and return the final text answer."""
+    result = graph.invoke({"messages": [HumanMessage(content=question)]})
+    # Last message is the AI's final answer
+    final = result["messages"][-1].content
+    if verbose:
+        print(f"\nFinal Answer: {final}")
+    return final
+
+
+# ── Examples ──────────────────────────────────────────────────────────────
 
 def simple_agent_example():
     """Agent with basic tools"""
@@ -46,30 +67,9 @@ def simple_agent_example():
 
     llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 
-    # Create list of tools
-    tools = [
-        get_current_time,
-        calculate,
-        word_counter,
-        text_reverser
-    ]
+    tools = [get_current_time, calculate, word_counter, text_reverser]
+    graph = create_react_agent(llm, tools)
 
-    # Get the React prompt from hub
-    prompt = hub.pull("hwchase17/react")
-
-    # Create the agent
-    agent = create_react_agent(llm, tools, prompt)
-
-    # Create agent executor
-    agent_executor = AgentExecutor(
-        agent=agent,
-        tools=tools,
-        verbose=True,
-        handle_parsing_errors=True,
-        max_iterations=10
-    )
-
-    # Test the agent
     questions = [
         "What time is it right now?",
         "What is 157 multiplied by 23?",
@@ -79,40 +79,23 @@ def simple_agent_example():
     for question in questions:
         print(f"\n{'='*60}")
         print(f"Question: {question}")
-        print('='*60)
-
+        print("="*60)
         try:
-            result = agent_executor.invoke({"input": question})
-            print(f"\nFinal Answer: {result['output']}")
+            _run_agent(graph, question)
         except Exception as e:
             print(f"Error: {str(e)}")
 
+
 def multi_step_agent_example():
-    """Agent that needs to use multiple tools"""
+    """Agent that needs to use multiple tools in sequence"""
     print("\n" + "="*60)
     print("FEATURE 5B: Multi-Step Agent Reasoning")
     print("="*60)
 
     llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+    tools = [get_current_time, calculate, word_counter, text_reverser]
+    graph = create_react_agent(llm, tools)
 
-    tools = [
-        get_current_time,
-        calculate,
-        word_counter,
-        text_reverser
-    ]
-
-    prompt = hub.pull("hwchase17/react")
-    agent = create_react_agent(llm, tools, prompt)
-
-    agent_executor = AgentExecutor(
-        agent=agent,
-        tools=tools,
-        verbose=True,
-        handle_parsing_errors=True
-    )
-
-    # Complex question requiring multiple tools
     complex_question = (
         "First, calculate what is 15 + 27. Then, take that result and "
         "multiply it by 3. Finally, tell me how many digits are in the final result."
@@ -121,11 +104,10 @@ def multi_step_agent_example():
     print(f"Question: {complex_question}\n")
 
     try:
-        result = agent_executor.invoke({"input": complex_question})
-        print(f"\n{'='*60}")
-        print(f"Final Answer: {result['output']}")
+        _run_agent(graph, complex_question)
     except Exception as e:
         print(f"Error: {str(e)}")
+
 
 def custom_tool_with_class():
     """Creating tools using the Tool class"""
@@ -135,7 +117,6 @@ def custom_tool_with_class():
 
     llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 
-    # Define tools using Tool class
     def string_length(text: str) -> str:
         """Returns the length of the input string"""
         return f"The string has {len(text)} characters."
@@ -150,78 +131,48 @@ def custom_tool_with_class():
         Tool(
             name="StringLength",
             func=string_length,
-            description="Useful for when you need to count the number of characters in a string."
+            description="Useful for when you need to count the number of characters in a string.",
         ),
         Tool(
             name="VowelCounter",
             func=vowel_counter,
-            description="Useful for counting how many vowels are in a text."
+            description="Useful for counting how many vowels are in a text.",
         ),
-        calculate
+        calculate,
     ]
 
-    prompt = hub.pull("hwchase17/react")
-    agent = create_react_agent(llm, tools, prompt)
-
-    agent_executor = AgentExecutor(
-        agent=agent,
-        tools=tools,
-        verbose=True,
-        handle_parsing_errors=True
-    )
-
+    graph = create_react_agent(llm, tools)
     question = "How many vowels are in the word 'LangChain'?"
 
     print(f"Question: {question}\n")
-
     try:
-        result = agent_executor.invoke({"input": question})
-        print(f"\n{'='*60}")
-        print(f"Final Answer: {result['output']}")
+        _run_agent(graph, question)
     except Exception as e:
         print(f"Error: {str(e)}")
 
+
 def agent_with_memory_example():
-    """Agent that maintains conversation memory"""
+    """Agent that maintains conversation memory across turns."""
     print("\n" + "="*60)
     print("FEATURE 5D: Agent with Memory")
     print("="*60)
 
-    from langchain.memory import ConversationBufferMemory
-    from langchain.agents import create_structured_chat_agent
+    from langgraph.checkpoint.memory import MemorySaver
 
     llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+    tools = [get_current_time, calculate, word_counter]
 
-    tools = [
-        get_current_time,
-        calculate,
-        word_counter
-    ]
+    # MemorySaver persists message history across invocations when the same
+    # thread_id is used in the config.
+    memory = MemorySaver()
+    graph = create_react_agent(llm, tools, checkpointer=memory)
 
-    # Create memory
-    memory = ConversationBufferMemory(
-        memory_key="chat_history",
-        return_messages=True
-    )
+    config = {"configurable": {"thread_id": "agent-demo"}}
 
-    # Get structured chat prompt
-    prompt = hub.pull("hwchase17/structured-chat-agent")
-
-    agent = create_structured_chat_agent(llm, tools, prompt)
-
-    agent_executor = AgentExecutor(
-        agent=agent,
-        tools=tools,
-        memory=memory,
-        verbose=True,
-        handle_parsing_errors=True
-    )
-
-    # Have a conversation
     conversation = [
         "Calculate 25 + 17 for me.",
         "Now multiply that result by 3.",
-        "What was my first question?"
+        "What was my first question?",
     ]
 
     print("Having a conversation with memory:\n")
@@ -229,19 +180,24 @@ def agent_with_memory_example():
     for user_input in conversation:
         print(f"\n{'='*60}")
         print(f"User: {user_input}")
-        print('='*60)
-
+        print("="*60)
         try:
-            result = agent_executor.invoke({"input": user_input})
-            print(f"\nAgent: {result['output']}")
+            result = graph.invoke(
+                {"messages": [HumanMessage(content=user_input)]},
+                config=config,
+            )
+            answer = result["messages"][-1].content
+            print(f"\nAgent: {answer}")
         except Exception as e:
             print(f"Error: {str(e)}")
+
 
 def main():
     simple_agent_example()
     multi_step_agent_example()
     custom_tool_with_class()
     agent_with_memory_example()
+
 
 if __name__ == "__main__":
     main()

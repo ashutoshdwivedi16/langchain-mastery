@@ -5,9 +5,10 @@ Demonstrates how to parse LLM outputs into structured formats
 
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
-from langchain.output_parsers import PydanticOutputParser, CommaSeparatedListOutputParser, StructuredOutputParser, ResponseSchema
-from langchain.prompts import PromptTemplate
-from pydantic import BaseModel, Field, validator
+from langchain_core.output_parsers import PydanticOutputParser, CommaSeparatedListOutputParser, StrOutputParser
+from langchain_classic.output_parsers import StructuredOutputParser, ResponseSchema
+from langchain_core.prompts import PromptTemplate
+from pydantic import BaseModel, Field, field_validator
 from typing import List
 
 load_dotenv()
@@ -96,10 +97,11 @@ def pydantic_output_parser():
         genre: str = Field(description="The genre of the book")
         rating: float = Field(description="Rating out of 5.0", ge=0, le=5)
 
-        @validator('year')
+        @field_validator('year')
+        @classmethod
         def year_must_be_reasonable(cls, v):
-            if v < 1000 or v > 2025:
-                raise ValueError('Year must be between 1000 and 2025')
+            if v < 1000 or v > 2026:
+                raise ValueError('Year must be between 1000 and 2026')
             return v
 
     # Create parser

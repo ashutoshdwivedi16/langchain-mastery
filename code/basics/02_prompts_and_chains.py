@@ -5,8 +5,7 @@ Demonstrates prompt engineering with templates and chaining operations
 
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
-from langchain.prompts import PromptTemplate, ChatPromptTemplate, MessagesPlaceholder
-from langchain.chains import LLMChain, SequentialChain
+from langchain_core.prompts import PromptTemplate, ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
 
 load_dotenv()

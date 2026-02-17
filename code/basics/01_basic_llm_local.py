@@ -3,9 +3,9 @@ Feature 1: Basic LLM Interaction - LOCAL VERSION (No API Required)
 Uses Ollama for local LLM inference
 """
 
-from langchain_community.llms import Ollama
-from langchain.callbacks.manager import CallbackManager
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+from langchain_ollama import OllamaLLM
+from langchain_core.callbacks.manager import CallbackManager
+from langchain_core.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
 def check_ollama():
     """Check if Ollama is accessible"""
@@ -33,7 +33,7 @@ def basic_llm_example():
     print("\n🚀 Using Ollama (Local LLM - No API needed!)")
 
     # Initialize local LLM
-    llm = Ollama(
+    llm = OllamaLLM(
         model="llama2",  # or "mistral", "phi", etc.
         temperature=0.7
     )
@@ -61,7 +61,7 @@ def streaming_example():
         return
 
     # Initialize with streaming callback
-    llm = Ollama(
+    llm = OllamaLLM(
         model="llama2",
         temperature=0.7,
         callback_manager=CallbackManager([StreamingStdOutCallbackHandler()])
@@ -85,7 +85,7 @@ def multiple_questions():
         print("\n❌ Ollama is not running!")
         return
 
-    llm = Ollama(model="llama2", temperature=0.7)
+    llm = OllamaLLM(model="llama2", temperature=0.7)
 
     questions = [
         "What is machine learning in one sentence?",
@@ -111,7 +111,7 @@ def main():
     print("✅ Basic LLM examples completed!")
     print("="*60)
     print("\n💡 Tips:")
-    print("  - Switch models: llm = Ollama(model='mistral')")
+    print("  - Switch models: llm = OllamaLLM(model='mistral')")
     print("  - Adjust creativity: temperature=0.9 (higher = more creative)")
     print("  - Available models: Run 'ollama list' in terminal")
     print("="*60 + "\n")
